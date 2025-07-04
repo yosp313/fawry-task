@@ -12,7 +12,7 @@ public abstract class Product {
     if (name == null || name.isEmpty()) {
       throw new IllegalArgumentException("Name cannot be null or empty.");
     }
-    if (price < 0) {
+    if (price <= 0) {
       throw new IllegalArgumentException("Price cannot be negative.");
     }
 
@@ -25,33 +25,44 @@ public abstract class Product {
     return name;
   }
 
-  public void setName(String name) {
-    if (name == null || name.isEmpty()) {
-      throw new IllegalArgumentException("Name cannot be null or empty.");
-    }
-    this.name = name;
-  }
-
   public double getPrice() {
     return price;
-  }
-
-  public void setPrice(double price) {
-    if (price < 0) {
-      throw new IllegalArgumentException("Price cannot be negative.");
-    }
-    this.price = price;
   }
 
   public int getQuantity() {
     return quantity;
   }
 
-  public void setQuantity(int quantity) {
+  public void increaseQuantity(int quantity) {
     if (quantity < 0) {
-      throw new IllegalArgumentException("Quantity cannot be negative.");
+      throw new IllegalArgumentException("Quantity to increase cannot be negative.");
     }
-    this.quantity = quantity;
+    if (quantity == 0) {
+      throw new IllegalArgumentException("Quantity to increase cannot be zero.");
+    }
+    if (this.quantity + quantity < 0) {
+      throw new IllegalArgumentException("Resulting quantity cannot be negative.");
+    }
+
+    this.quantity += quantity;
+
+  }
+
+  public void decreaseQuantity(int quantity) {
+    if (quantity < 0) {
+      throw new IllegalArgumentException("Quantity to decrease cannot be negative.");
+    }
+    if (this.quantity < quantity) {
+      throw new IllegalArgumentException("Insufficient quantity to decrease.");
+    }
+    if (quantity == 0) {
+      throw new IllegalArgumentException("Quantity to decrease cannot be zero.");
+    }
+    if (this.quantity - quantity < 0) {
+      throw new IllegalArgumentException("Resulting quantity cannot be negative.");
+    }
+
+    this.quantity -= quantity;
   }
 
   public abstract boolean isAvailable();
