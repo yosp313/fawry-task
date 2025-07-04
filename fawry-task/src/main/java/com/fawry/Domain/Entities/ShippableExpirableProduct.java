@@ -14,7 +14,7 @@ public class ShippableExpirableProduct extends Product implements Shippable, Exp
     if (weight <= 0) {
       throw new IllegalArgumentException("Weight must be greater than zero.");
     }
-    if (expirationDate == null || expirationDate.isBefore(LocalDate.now())) {
+    if (expirationDate == null || expirationDate.isBefore(LocalDate.now().plusDays(1))) {
       throw new IllegalArgumentException("Expiration date must be a future date.");
     }
     this.weight = weight;
@@ -48,7 +48,7 @@ public class ShippableExpirableProduct extends Product implements Shippable, Exp
   }
 
   public void setExpirationDate(LocalDate expirationDate) {
-    if (expirationDate == null || expirationDate.isBefore(LocalDate.now())) {
+    if (expirationDate == null || expirationDate.isBefore(LocalDate.now().plusDays(1))) {
       throw new IllegalArgumentException("Expiration date must be a future date.");
     }
     this.expirationDate = expirationDate;
