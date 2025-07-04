@@ -1,8 +1,8 @@
 package com.fawry.Domain.Entities;
 
 public abstract class Product {
-  String name;
-  double price;
+  final String name;
+  final double price;
   int quantity;
 
   public Product(int quantity, String name, double price) {
