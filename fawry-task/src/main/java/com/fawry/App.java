@@ -1,18 +1,14 @@
 package com.fawry;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import com.fawry.Application.Services.ShippingService;
 import com.fawry.Domain.Entities.Cart;
 import com.fawry.Domain.Entities.Customer;
 import com.fawry.Domain.Entities.NonExpirableNonShippableProduct;
 import com.fawry.Domain.Entities.Product;
 import com.fawry.Domain.Entities.ShippableExpirableProduct;
 import com.fawry.Domain.Entities.ShippableProduct;
-import com.fawry.Domain.Interfaces.Expirable;
 import com.fawry.Domain.Interfaces.Shippable;
 
 public class App {
@@ -39,76 +35,59 @@ public class App {
   }
 
   public static void checkout(Customer customer, Cart cart) {
-    System.out.println("Processing checkout...");
 
     if (cart.isEmpty()) {
-      System.err.println("Checkout Error: Cart is empty.");
+      System.err.print("Checkout Error: Cart is empty.\n");
       return;
     }
 
-    double subtotal = 0;
-    List<Shippable> itemsToShip = new ArrayList<>();
+    double subtotal = cart.getTotalAmount();
+    double shippingFee = 30.0;
+    double totalAmount = subtotal + shippingFee;
+    if (customer.getBalance() < totalAmount) {
+      System.err.print("Checkout Error: Insufficient customer balance.\n");
+      return;
+    }
 
+    System.out.print("** Shipment notice **\n");
+    double totalWeight = 0;
+    for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
+      if (entry.getKey() instanceof Shippable) {
+        Shippable shippableItem = (Shippable) entry.getKey();
+        int quantity = entry.getValue();
+        double itemTotalWeight = shippableItem.getWeight() * quantity;
+        totalWeight += itemTotalWeight;
+
+        System.out.print(quantity + "x " + entry.getKey().getName() + "\t");
+        System.out.print((int) (itemTotalWeight * 1000) + "g\n");
+      }
+    }
+    System.out.print("Total package weight " + totalWeight + "kg\n");
+
+    System.out.print("\n");
+
+    System.out.print("** Checkout receipt **\n");
     for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
       Product product = entry.getKey();
       int quantity = entry.getValue();
-
-      if (product.getQuantity() < quantity) {
-        System.err.printf("Checkout Error: Product '%s' is out of stock.%n", product.getName());
-        return;
-      }
-
-      if (product instanceof Expirable) {
-        if (((Expirable) product).isExpired()) {
-          System.err.printf("Checkout Error: Product '%s' is expired.%n", product.getName());
-          return;
-        }
-      }
-
-      // Add product price to subtotal
-      subtotal += product.getPrice() * quantity;
-
-      // Collect shippable items
-      if (product instanceof Shippable) {
-        // Add the item N times for N quantities for shipping purposes
-        for (int i = 0; i < quantity; i++) {
-          itemsToShip.add((Shippable) product);
-        }
-      }
+      System.out.print(quantity + "x " + product.getName() + "\t");
+      System.out.print((int) (product.getPrice() * quantity) + "\n");
     }
 
-    double shippingFee = itemsToShip.isEmpty() ? 0 : 50.00;
-    double totalAmount = subtotal + shippingFee;
+    System.out.print("--------------------------\n");
 
-    if (customer.getBalance() < totalAmount) {
-      System.err.println("Checkout Error: Insufficient customer balance.");
-      return;
-    }
+    System.out.print("Subtotal" + "\t");
+    System.out.print((int) subtotal + "\n");
+    System.out.print("Shipping\t");
+    System.out.print((int) shippingFee + "\n");
+    System.out.print("Amount\t");
+    System.out.print((int) totalAmount + "\n");
 
     customer.deductBalance(totalAmount);
-
     for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
       Product product = entry.getKey();
       int quantity = entry.getValue();
       product.decreaseQuantity(quantity);
     }
-
-    ShippingService shippingService = new ShippingService();
-    shippingService.ship(itemsToShip);
-
-    System.out.println("** Checkout Receipt **");
-    for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
-      Product product = entry.getKey();
-      int quantity = entry.getValue();
-      System.out.printf("- %dx %s @ $%.2f each = $%.2f%n", quantity, product.getName(), product.getPrice(),
-          product.getPrice() * quantity);
-    }
-    System.out.println("-------------------------");
-    System.out.printf("Subtotal:         $%.2f%n", subtotal);
-    System.out.printf("Shipping Fees:    $%.2f%n", shippingFee);
-    System.out.printf("Paid Amount:      $%.2f%n", totalAmount);
-    System.out.println("-------------------------");
-    System.out.printf("Remaining Balance: $%.2f%n", customer.getBalance());
-    System.out.println("\nCheckout successful!");
   }
 }
