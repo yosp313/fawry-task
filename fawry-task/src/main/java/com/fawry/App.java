@@ -20,7 +20,7 @@ public class App {
     Product product5 = new ShippableExpirableProduct(10, "Milk", 10.0, LocalDate.of(2025, 10, 10), 4.0);
     Product product3 = new ShippableExpirableProduct(
         1, "Bread", 2.0, LocalDate.of(2025, 10, 15), 0.2);
-    Product product4 = new NonExpirableNonShippableProduct(5, "Mobile Scratch Card", 50.0);
+    Product product4 = new NonExpirableNonShippableProduct(5, "Scratch Card", 50.0);
 
     Cart cart = new Cart("cart123", "customer123", 0.0);
 
@@ -58,30 +58,28 @@ public class App {
         double itemTotalWeight = shippableItem.getWeight() * quantity;
         totalWeight += itemTotalWeight;
 
-        System.out.print(quantity + "x " + entry.getKey().getName() + "\t");
-        System.out.print((int) (itemTotalWeight * 1000) + "g\n");
+        // Use String.format for consistent spacing
+        System.out.printf("%-20s %6dg%n",
+            quantity + "x " + entry.getKey().getName(),
+            (int) (itemTotalWeight * 1000));
       }
     }
-    System.out.print("Total package weight " + totalWeight + "kg\n");
-
-    System.out.print("\n");
+    System.out.printf("Total package weight %.1fkg%n%n", totalWeight);
 
     System.out.print("** Checkout receipt **\n");
     for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
       Product product = entry.getKey();
       int quantity = entry.getValue();
-      System.out.print(quantity + "x " + product.getName() + "\t");
-      System.out.print((int) (product.getPrice() * quantity) + "\n");
+      // Consistent formatting: left-aligned product, right-aligned price
+      System.out.printf("%-20s %6d%n",
+          quantity + "x " + product.getName(),
+          (int) (product.getPrice() * quantity));
     }
 
     System.out.print("--------------------------\n");
-
-    System.out.print("Subtotal" + "\t");
-    System.out.print((int) subtotal + "\n");
-    System.out.print("Shipping\t");
-    System.out.print((int) shippingFee + "\n");
-    System.out.print("Amount\t");
-    System.out.print((int) totalAmount + "\n");
+    System.out.printf("%-20s %6d%n", "Subtotal", (int) subtotal);
+    System.out.printf("%-20s %6d%n", "Shipping", (int) shippingFee);
+    System.out.printf("%-20s %6d%n", "Amount", (int) totalAmount);
 
     customer.deductBalance(totalAmount);
     for (Map.Entry<Product, Integer> entry : cart.getProducts().entrySet()) {
