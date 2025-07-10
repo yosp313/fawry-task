@@ -1,8 +1,10 @@
 package com.fawry;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
+import com.fawry.Application.Services.RecommendationService;
 import com.fawry.Domain.Entities.Cart;
 import com.fawry.Domain.Entities.Customer;
 import com.fawry.Domain.Entities.NonExpirableNonShippableProduct;
@@ -86,6 +88,23 @@ public class App {
       Product product = entry.getKey();
       int quantity = entry.getValue();
       product.decreaseQuantity(quantity);
+    }
+
+    // Show recommendations
+    showRecommendations(cart);
+  }
+
+  private static void showRecommendations(Cart cart) {
+    RecommendationService recommendationService = new RecommendationService();
+    List<Product> recommendations = recommendationService.getRecommendations(cart);
+    
+    if (!recommendations.isEmpty()) {
+      System.out.print("\n** Recommended for you **\n");
+      for (Product product : recommendations) {
+        System.out.printf("%-20s %6d%n", 
+            product.getName(), 
+            (int) product.getPrice());
+      }
     }
   }
 }
